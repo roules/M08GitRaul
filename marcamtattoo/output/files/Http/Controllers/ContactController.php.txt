@@ -1,0 +1,104 @@
+<?php
+/**
+* Aquesta fitxer conté les funcions relacionades amb el formulari de contacte.
+*
+* En aquest fitxer podem trobar les funcions que carrega el formulari, ja sigui per enviar o rebre dades. Podem trobar la funció de contact que es la que s'encarrega de rebre
+* les dades del formulari.
+*
+* @package app\Http\Controllers
+* @author Raúl <raul@gmail.com>
+* @license GPL
+*/
+
+namespace App\Http\Controllers;
+
+use App\Contact;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use EllipseSynergie\ApiResponse\Contracts\Response;
+use App\Transformer\EventTransformer;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Input;
+use App\Mail\OrderShipped;
+use Mail;
+
+
+/**
+* Classe ContactController.
+*
+* Aquesta Classe és on s'hi troben les funcions relacionades amb el formulari de contacte. Aquesta hereda funcions de la classe Controller.
+*
+* @uses Controllers::Controller to retrieve the principal functions.
+* @see ContactController::contacta()       Per veure com s'agafen les dades del formulari.
+* @todo La web està en fase de desenvolupament, pot ser que hagin classes o mètodes que no es trobin un cop finalitzada la pàgina.
+* @version Laravel 5.4
+*/
+class ContactController extends Controller
+{
+
+    /**
+     * @param Response
+     */
+    public function __construct(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    /**
+     * Controlador d'esdeveniments.
+     *
+     * @param  int  $id
+     * @return Response
+     */
+
+
+
+   /**
+   * Funció contacta.
+   *
+   * Aquesta funció s'encarrega d'obtenir les dades que s'han passat pel formulari per després enviar un missatge a l'usauri.
+   *
+   * @param string $request
+   * @var string $request Variable que conté l'informació enviada pel formulari
+   * @deprecated Laravel 5.4
+   * @return redirect('/contact')
+   */
+    public function contacta(Request $request)
+    {
+
+      $tema= $request->input('tema');
+      $consulta = $request->input('consulta');
+      $email = $request->input('email');
+
+      // $newEvent->save();
+      if ($tema=="" || $consulta=="" || $email=="" ){
+
+               flash("Error a l'enviar el formulari, revisa que has omplert totes les dades.", 'danger');
+
+               return redirect('/contact');
+      }
+
+      else{
+        flash("Formulari enviat correctament.", 'success');
+        $content = [
+      		'title'=> $tema,
+      		'body'=> $consulta,
+          'client'=> $email,
+      		'button' => 'Envia'
+      		];
+
+      	$receiverAddress = 'raulsanchezrobles14@gmail.com';
+
+      	Mail::to($receiverAddress)->send(new OrderShipped($content));
+
+
+        return redirect('/contact');
+      }
+
+
+
+    }
+
+
+}
+
